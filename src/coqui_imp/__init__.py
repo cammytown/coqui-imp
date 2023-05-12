@@ -1,1 +1,1 @@
-from .CoquiImp import CoquiImp
+from .coqui_imp import CoquiImp
