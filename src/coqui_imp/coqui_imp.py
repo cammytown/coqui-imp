@@ -1,52 +1,64 @@
 from TTS.api import TTS
 from playsound import playsound
+from typing import Optional
 
 class CoquiImp:
     tts: TTS
     auto_select_count: int = 0
     verbose: bool = False
 
-    def __init__(self, model_name: str = None):
+    def __init__(self,
+                 model_name: Optional[str] = None,
+                 gpu: bool = False,):
+
         if(not model_name):
             # List available models and choose the first one
             # model_name = TTS.list_models()[0]
             # model_name = "tts_models/en/ljspeech/tacotron2-DCA"
             # model_name = "tts_models/en/ljspeech/vits"
+            # tts_models/multilingual/multi-dataset/your_tts
             model_name = "tts_models/en/ljspeech/glow-tts"
 
         # Init TTS
-        self.tts = TTS(model_name)
+        print(f"Loading TTS model: {model_name} ...")
+        self.tts = TTS(model_name = model_name,
+                       gpu = gpu)
 
     def say(self,
             message: str,
             output_path: str = "coqui_output.wav",
-            speaker: str = None,
-            # language: str = None
+            speaker: Optional[str] = None,
+            # language: Optional[str] = None
     ):
         if __debug__ and self.verbose:
             print('CoquiImp saying: ' + message)
 
-        if(not speaker):
-            speaker = self.tts.speakers[0]
+        args = {
+            "text": message,
+            "file_path": output_path,
+        }
 
         # Run TTS
-        # If multi-voice:
+        # If multi-voice
         if(self.tts.speakers):
-            self.tts.tts_to_file(text=message,
-                            speaker=speaker,
-                            language=self.tts.languages[0],
-                            file_path=output_path)
-        else:
-            self.tts.tts_to_file(text=message,
-                            file_path=output_path)
+            if(speaker):
+                args["speaker"] = speaker
+            else:
+                args["speaker"] = self.tts.speakers[0]
 
-        # Play the output file:
+        # If multi-language
+        if(self.tts.languages):
+            args["language"] = self.tts.languages[0]
+
+        self.tts.tts_to_file(**args)
+
+        # Play the output file
         playsound(output_path)
 
     #@REVISIT naming
     def auto_select_speaker(self):
         # if self.tts:
-        #@REVISIT only for multi-speaker TTS:
+        #@REVISIT only for multi-speaker TTS
         #@TODO obviously tts.tts is bad; revisit
         if(self.tts.speakers):
             speaker_index = self.auto_select_count % len(self.tts.speakers)
