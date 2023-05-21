@@ -1,6 +1,6 @@
-from TTS.api import TTS
-from playsound import playsound
 from typing import Optional
+from TTS.api import TTS
+import simpleaudio as sa
 
 class CoquiImp:
     tts: TTS
@@ -25,16 +25,16 @@ class CoquiImp:
                        gpu = gpu)
 
     def say(self,
-            message: str,
+            text: str,
             output_path: str = "coqui_output.wav",
             speaker: Optional[str] = None,
             # language: Optional[str] = None
-    ):
+    ) -> sa.PlayObject:
         if __debug__ and self.verbose:
-            print('CoquiImp saying: ' + message)
+            print('CoquiImp saying: ' + text)
 
         args = {
-            "text": message,
+            "text": text,
             "file_path": output_path,
         }
 
@@ -53,7 +53,10 @@ class CoquiImp:
         self.tts.tts_to_file(**args)
 
         # Play the output file
-        playsound(output_path)
+        wave_obj = sa.WaveObject.from_wave_file(output_path)
+        play_obj = wave_obj.play()
+
+        return play_obj
 
     #@REVISIT naming
     def auto_select_speaker(self):
