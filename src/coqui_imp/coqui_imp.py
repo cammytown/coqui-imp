@@ -1,15 +1,20 @@
 from typing import Optional
-from TTS.api import TTS
+
+# print("Loading simpleaudio") #@TEMP
 import simpleaudio as sa
 
 class CoquiImp:
-    tts: TTS
+    # tts
     auto_select_count: int = 0
     verbose: bool = False
 
     def __init__(self,
                  model_name: Optional[str] = None,
                  gpu: bool = False,):
+
+        # Load TTS here as it can take a while
+        print("Loading TTS") #@TEMP
+        from TTS.api import TTS
 
         if(not model_name):
             # List available models and choose the first one
@@ -55,6 +60,8 @@ class CoquiImp:
         # Play the output file
         wave_obj = sa.WaveObject.from_wave_file(output_path)
         play_obj = wave_obj.play()
+
+        print("Playing audio") #@TEMP
 
         return play_obj
 
